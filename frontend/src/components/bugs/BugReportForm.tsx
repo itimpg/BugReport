@@ -121,7 +121,7 @@ export function BugReportForm({ bug }: Props) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="solution">How to Solve</Label>
+        <Label htmlFor="solution">Solution</Label>
         <textarea
           id="solution"
           {...register("solution")}

@@ -11,7 +11,7 @@ export async function GET(request: Request) {
   const page       = Math.max(1, Number.parseInt(searchParams.get("page")     ?? "1"));
   const pageSize   = Math.max(1, Number.parseInt(searchParams.get("pageSize") ?? "10"));
   const search     = searchParams.get("search")     ?? "";
-  const categoryId = searchParams.get("categoryId") ?? "";
+  const categoryIds = searchParams.getAll("categoryId");
   const status     = searchParams.get("status")     ?? "";
   const dateFrom   = searchParams.get("dateFrom")   ?? "";
   const dateTo     = searchParams.get("dateTo")     ?? "";
@@ -19,14 +19,14 @@ export async function GET(request: Request) {
 
   const service = createSupabaseServiceClient();
 
-  // Resolve category filter to bug IDs first
+  // Resolve category filter to bug IDs first (OR across selected categories)
   let categoryBugIds: string[] | null = null;
-  if (categoryId) {
+  if (categoryIds.length > 0) {
     const { data } = await service
       .from("bug_report_categories")
       .select("bug_report_id")
-      .eq("category_id", categoryId);
-    categoryBugIds = data?.map((r) => r.bug_report_id) ?? [];
+      .in("category_id", categoryIds);
+    categoryBugIds = [...new Set(data?.map((r) => r.bug_report_id) ?? [])];
     if (categoryBugIds.length === 0) {
       return NextResponse.json({ items: [], totalCount: 0, page, pageSize, totalPages: 0 });
     }
