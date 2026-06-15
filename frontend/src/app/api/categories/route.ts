@@ -12,7 +12,9 @@ export async function GET() {
     .order("name");
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  return NextResponse.json(
+    (data ?? []).map((c) => ({ id: c.id, name: c.name, description: c.description, createdAt: c.created_at, updatedAt: c.updated_at }))
+  );
 }
 
 export async function POST(request: Request) {
@@ -31,5 +33,5 @@ export async function POST(request: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data, { status: 201 });
+  return NextResponse.json({ id: data.id, name: data.name, description: data.description, createdAt: data.created_at, updatedAt: data.updated_at }, { status: 201 });
 }

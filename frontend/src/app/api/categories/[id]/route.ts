@@ -21,7 +21,7 @@ export async function PUT(request: Request, { params }: Params) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  return NextResponse.json({ id: data.id, name: data.name, description: data.description, createdAt: data.created_at, updatedAt: data.updated_at });
 }
 
 export async function DELETE(_req: Request, { params }: Params) {

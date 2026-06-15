@@ -33,7 +33,7 @@ export function CategoryTable({ categories, onEdit, onDelete }: Props) {
               <td className="px-4 py-3">
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" onClick={() => onEdit(c)}><Pencil className="w-4 h-4" /></Button>
-                  <Button variant="ghost" size="icon" onClick={() => onDelete(c.id)}><Trash2 className="w-4 h-4 text-red-500" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => { if (confirm(`Delete category "${c.name}"?`)) onDelete(c.id); }}><Trash2 className="w-4 h-4 text-red-500" /></Button>
                 </div>
               </td>
             </tr>

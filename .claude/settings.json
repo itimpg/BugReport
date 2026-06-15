@@ -6,7 +6,10 @@
       "Bash(Select-Object -Last 20)",
       "PowerShell(dotnet package search \"Npgsql.EntityFrameworkCore.PostgreSQL\" --take 5 2>&1)",
       "PowerShell(Test-NetConnection -ComputerName \"db.jgsrebitaxhcejujlgef.supabase.co\" -Port 5432 -WarningAction SilentlyContinue)",
-      "PowerShell(Test-NetConnection -ComputerName \"db.jgsrebitaxhcejujlgef.supabase.co\" -Port 6543 -WarningAction SilentlyContinue)"
+      "PowerShell(Test-NetConnection -ComputerName \"db.jgsrebitaxhcejujlgef.supabase.co\" -Port 6543 -WarningAction SilentlyContinue)",
+      "Bash(npm list *)",
+      "PowerShell(cd \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\" && npm run dev 2>&1 &)",
+      "PowerShell(cd \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\" && Start-Process pwsh -ArgumentList '-NoProfile','-Command','npm run dev' -WorkingDirectory \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\")"
     ]
   }
 }

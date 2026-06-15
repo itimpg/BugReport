@@ -10,8 +10,10 @@ import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function BugsPage() {
+  const { user } = useAuth();
   const [bugList, setBugList]   = useState<BugReportList | null>(null);
   const [categories, setCats]   = useState<Category[]>([]);
   const [isLoading, setLoading] = useState(true);
@@ -49,7 +51,12 @@ export default function BugsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Bug Reports</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Bug Reports</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {user?.role === "Admin" ? "Viewing all bug reports" : "Viewing your bug reports"}
+          </p>
+        </div>
         <Button asChild>
           <Link href="/bugs/create"><Plus className="mr-2 h-4 w-4" /> New Bug Report</Link>
         </Button>

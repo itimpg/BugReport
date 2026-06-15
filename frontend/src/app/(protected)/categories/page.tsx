@@ -13,7 +13,7 @@ import { redirect } from "next/navigation";
 
 export default function CategoriesPage() {
   const { user } = useAuth();
-  if (user?.role !== "Admin") redirect("/dashboard");
+  if (user?.role !== "Admin") redirect("/bugs");
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setLoading]     = useState(true);

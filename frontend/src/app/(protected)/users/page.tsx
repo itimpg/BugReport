@@ -13,7 +13,7 @@ import { Search } from "lucide-react";
 
 export default function UsersPage() {
   const { user } = useAuth();
-  if (user?.role !== "Admin") redirect("/dashboard");
+  if (user?.role !== "Admin") redirect("/bugs");
 
   const [userList, setUserList] = useState<UserList | null>(null);
   const [isLoading, setLoading] = useState(true);

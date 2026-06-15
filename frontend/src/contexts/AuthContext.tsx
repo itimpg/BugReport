@@ -19,27 +19,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase                = useMemo(() => createSupabaseBrowserClient(), []);
 
   useEffect(() => {
-    const loadProfile = async (userId: string) => {
-      const { data } = await supabase
-        .from("users")
-        .select("id, email, display_name, role, is_disabled")
-        .eq("id", userId)
-        .single();
-      if (data && !data.is_disabled) {
-        setUser({ id: data.id, email: data.email, displayName: data.display_name, role: data.role });
-      } else {
+    const loadProfile = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setUser({ id: data.id, email: data.email, displayName: data.display_name, role: data.role });
+        } else {
+          setUser(null);
+        }
+      } catch {
         setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) loadProfile(session.user.id).finally(() => setLoading(false));
+      if (session?.user) loadProfile();
       else setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        loadProfile(session.user.id).finally(() => setLoading(false));
+        loadProfile();
       } else {
         setUser(null);
         setLoading(false);

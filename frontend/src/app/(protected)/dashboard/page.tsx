@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
 import type { DashboardData } from "@/types";
 import { KpiCard } from "@/components/dashboard/KpiCard";
@@ -10,8 +11,11 @@ import { RecentBugsTable } from "@/components/dashboard/RecentBugsTable";
 import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
 import { Bug, AlertCircle, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  if (user?.role !== "Admin") redirect("/bugs");
   const [data, setData]         = useState<DashboardData | null>(null);
   const [isLoading, setLoading] = useState(true);
   const [filters, setFilters]   = useState<{ month?: number; year?: number; categoryId?: string }>({});

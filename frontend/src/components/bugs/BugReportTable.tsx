@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { BugReport } from "@/types";
 import { StatusBadge } from "@/components/bugs/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ interface Props {
 
 export function BugReportTable({ bugs, onDelete }: Props) {
   const { user } = useAuth();
+  const router = useRouter();
 
   if (bugs.length === 0)
     return <p className="text-center py-12 text-gray-400">No bug reports found.</p>;
@@ -33,33 +35,44 @@ export function BugReportTable({ bugs, onDelete }: Props) {
           </tr>
         </thead>
         <tbody>
-          {bugs.map((b) => (
-            <tr key={b.id} className="border-b last:border-0 hover:bg-gray-50">
-              <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">{b.title}</td>
-              <td className="px-4 py-3">
-                <div className="flex flex-wrap gap-1">
-                  {b.categories.map((c) => (
-                    <span key={c.id} className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-100">{c.name}</span>
-                  ))}
-                </div>
-              </td>
-              <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
-              <td className="px-4 py-3 text-gray-600">{b.reporterName}</td>
-              <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatDate(b.createdAt)}</td>
-              <td className="px-4 py-3">
-                {(user?.role === "Admin" || user?.id === b.reportedBy) && (
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/bugs/${b.id}/edit`}><Pencil className="w-4 h-4" /></Link>
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(b.id)}>
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
+          {bugs.map((b) => {
+            const canEdit = user?.role === "Admin" || user?.id === b.reportedBy;
+            return (
+              <tr
+                key={b.id}
+                className={`border-b last:border-0 hover:bg-gray-50 ${canEdit ? "cursor-pointer" : ""}`}
+                onClick={(e) => {
+                  // Don't navigate if clicking the action buttons
+                  if ((e.target as HTMLElement).closest("button, a")) return;
+                  if (canEdit) router.push(`/bugs/${b.id}/edit`);
+                }}
+              >
+                <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">{b.title}</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-1">
+                    {b.categories.map((c) => (
+                      <span key={c.id} className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-100">{c.name}</span>
+                    ))}
                   </div>
-                )}
-              </td>
-            </tr>
-          ))}
+                </td>
+                <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
+                <td className="px-4 py-3 text-gray-600">{b.reporterName}</td>
+                <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatDate(b.createdAt)}</td>
+                <td className="px-4 py-3">
+                  {canEdit && (
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link href={`/bugs/${b.id}/edit`}><Pencil className="w-4 h-4" /></Link>
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => onDelete(b.id)}>
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
