@@ -46,11 +46,32 @@ export async function getAuthProfile(): Promise<AuthProfile | null> {
   if (!user) return null;
 
   const service = createSupabaseServiceClient();
-  const { data: profile } = await service
+  let { data: profile } = await service
     .from("users")
     .select("id, email, display_name, role, is_disabled")
     .eq("id", user.id)
     .single();
+
+  // Auto-create profile for new OAuth users if the trigger hasn't fired yet
+  if (!profile) {
+    const displayName =
+      user.user_metadata?.full_name ||
+      user.user_metadata?.name ||
+      user.email?.split("@")[0] ||
+      "Unknown";
+    const { data: created } = await service
+      .from("users")
+      .insert({
+        id: user.id,
+        email: user.email ?? "",
+        display_name: displayName,
+        role: "User",
+        is_disabled: false,
+      })
+      .select("id, email, display_name, role, is_disabled")
+      .single();
+    profile = created;
+  }
 
   if (!profile || profile.is_disabled) return null;
   return profile as AuthProfile;
