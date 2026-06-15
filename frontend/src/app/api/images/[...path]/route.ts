@@ -37,7 +37,7 @@ export async function GET(_req: Request, { params }: Params) {
   const ext = segments.length >= 2 ? segments[segments.length - 2].toLowerCase() : "jpg";
   const contentType = MIME[ext] ?? "image/jpeg";
 
-  return new NextResponse(imageBuffer, {
+  return new NextResponse(new Uint8Array(imageBuffer), {
     headers: {
       "Content-Type": contentType,
       "Cache-Control": "private, max-age=3600",
