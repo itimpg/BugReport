@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: BugReport.API/Dockerfile
+    container_name: bugreport-api
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING}
+      - Jwt__SecretKey=${JWT_SECRET_KEY}
+      - Jwt__Issuer=BugReportAPI
+      - Jwt__Audience=BugReportClient
+      - Jwt__ExpiryMinutes=60
+      - Google__ClientId=${GOOGLE_CLIENT_ID}
+      - Google__ClientSecret=${GOOGLE_CLIENT_SECRET}
+      - Supabase__Url=${SUPABASE_URL}
+      - Supabase__ServiceRoleKey=${SUPABASE_SERVICE_ROLE_KEY}
+      - Supabase__StorageBucket=bug-images
+      - Cors__AllowedOrigins__0=${FRONTEND_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
