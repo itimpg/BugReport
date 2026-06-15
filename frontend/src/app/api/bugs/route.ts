@@ -55,7 +55,7 @@ export async function GET(request: Request) {
   const signedUrls: Record<string, string> = {};
   if (imagePaths.length > 0) {
     const { data: urls } = await service.storage.from("bug-images").createSignedUrls(imagePaths, 3600);
-    urls?.forEach((u) => { if (u.signedUrl) signedUrls[u.path] = u.signedUrl; });
+    urls?.forEach((u) => { if (u.signedUrl && u.path) signedUrls[u.path] = u.signedUrl; });
   }
 
   const items = (bugs ?? []).map((b) => ({
@@ -66,11 +66,11 @@ export async function GET(request: Request) {
     incidentDate: b.incident_date,
     imageUrl:     b.image_url ? signedUrls[b.image_url] : undefined,
     reportedBy:   b.reported_by,
-    reporterName: (b.users as { display_name: string } | null)?.display_name ?? "Unknown",
+    reporterName: (b.users as any)?.display_name ?? "Unknown",
     createdAt:    b.created_at,
     updatedAt:    b.updated_at,
-    categories:   (b.bug_report_categories as { categories: { id: string; name: string } }[])
-                    ?.map((bc) => bc.categories).filter(Boolean) ?? [],
+    categories:   ((b.bug_report_categories as any[]) ?? [])
+                    .map((bc) => bc.categories).filter(Boolean),
   }));
 
   const totalCount = count ?? 0;

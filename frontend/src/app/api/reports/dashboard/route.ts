@@ -68,7 +68,7 @@ export async function GET(request: Request) {
 
   const catCounts: Record<string, number> = {};
   (catLinks ?? []).forEach((bc) => {
-    const name = (bc.categories as { name: string } | null)?.name;
+    const name = (bc.categories as any)?.name;
     if (name) catCounts[name] = (catCounts[name] ?? 0) + 1;
   });
   const byCategory = Object.entries(catCounts)
@@ -95,7 +95,7 @@ export async function GET(request: Request) {
     title:        b.title,
     status:       b.status,
     createdAt:    b.created_at,
-    reporterName: (b.users as { display_name: string } | null)?.display_name ?? "Unknown",
+    reporterName: (b.users as any)?.display_name ?? "Unknown",
   }));
 
   return NextResponse.json({ totalBugs, openBugs, inProgressBugs, resolvedBugs, closedBugs, byCategory, byMonth, recentBugs });

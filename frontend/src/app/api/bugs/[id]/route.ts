@@ -42,11 +42,11 @@ export async function GET(_req: Request, { params }: Params) {
     incidentDate: bug.incident_date,
     imageUrl,
     reportedBy:   bug.reported_by,
-    reporterName: (bug.users as { display_name: string } | null)?.display_name ?? "Unknown",
+    reporterName: (bug.users as any)?.display_name ?? "Unknown",
     createdAt:    bug.created_at,
     updatedAt:    bug.updated_at,
-    categories:   (bug.bug_report_categories as { categories: { id: string; name: string } }[])
-                    ?.map((bc) => bc.categories).filter(Boolean) ?? [],
+    categories:   ((bug.bug_report_categories as any[]) ?? [])
+                    .map((bc) => bc.categories).filter(Boolean),
   });
 }
 
