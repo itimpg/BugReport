@@ -48,8 +48,8 @@ export async function GET(request: Request) {
   if (status)                   query = query.eq("status", status);
   if (categoryBugIds)           query = query.in("id", categoryBugIds);
   if (search)                   query = query.textSearch("title", search, { type: "websearch" });
-  if (dateFrom)                 query = query.gte("created_at", `${dateFrom}T00:00:00.000Z`);
-  if (dateTo)                   query = query.lte("created_at", `${dateTo}T23:59:59.999Z`);
+  if (dateFrom)                 query = query.gte("created_at", new Date(`${dateFrom}T00:00:00.000+07:00`).toISOString());
+  if (dateTo)                   query = query.lte("created_at", new Date(`${dateTo}T23:59:59.999+07:00`).toISOString());
 
   const { data: bugs, count, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

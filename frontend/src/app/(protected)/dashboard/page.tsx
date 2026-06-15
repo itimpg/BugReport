@@ -12,13 +12,14 @@ import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
 import { Bug, AlertCircle, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { getBangkokNow } from "@/lib/utils";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   if (user?.role !== "Admin") redirect("/bugs");
   const [data, setData]         = useState<DashboardData | null>(null);
   const [isLoading, setLoading] = useState(true);
-  const [filters, setFilters]   = useState<{ month?: number; year?: number; categoryId?: string }>({ year: new Date().getFullYear() });
+  const [filters, setFilters]   = useState<{ month?: number; year?: number; categoryId?: string }>({ year: getBangkokNow().year });
   const { toast } = useToast();
   const toastRef = useRef(toast);
   useEffect(() => { toastRef.current = toast; }, [toast]);

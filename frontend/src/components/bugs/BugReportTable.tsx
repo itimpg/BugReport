@@ -36,7 +36,8 @@ export function BugReportTable({ bugs, onDelete }: Props) {
         </thead>
         <tbody>
           {bugs.map((b) => {
-            const canEdit = user?.role === "Admin" || user?.id === b.reportedBy;
+            const canEdit   = user?.role === "Admin" || user?.id === b.reportedBy;
+            const canDelete = user?.role === "Admin";
             return (
               <tr
                 key={b.id}
@@ -59,14 +60,18 @@ export function BugReportTable({ bugs, onDelete }: Props) {
                 <td className="px-4 py-3 text-gray-600">{b.reporterName}</td>
                 <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatDate(b.createdAt)}</td>
                 <td className="px-4 py-3">
-                  {canEdit && (
+                  {(canEdit || canDelete) && (
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/bugs/${b.id}/edit`}><Pencil className="w-4 h-4" /></Link>
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => onDelete(b.id)}>
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
+                      {canEdit && (
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={`/bugs/${b.id}/edit`}><Pencil className="w-4 h-4" /></Link>
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button variant="ghost" size="icon" onClick={() => onDelete(b.id)}>
+                          <Trash2 className="w-4 h-4 text-red-500" />
+                        </Button>
+                      )}
                     </div>
                   )}
                 </td>

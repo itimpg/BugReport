@@ -5,6 +5,7 @@ import type { Category } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { getBangkokMonthRange } from "@/lib/utils";
 
 interface Filters {
   search?: string;
@@ -21,17 +22,7 @@ interface Props {
 
 const STATUSES = ["Open", "InProgress", "Resolved", "Closed"];
 
-function currentMonthRange() {
-  const now = new Date();
-  const from = new Date(now.getFullYear(), now.getMonth(), 1);
-  const to   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to:   to.toISOString().slice(0, 10),
-  };
-}
-
-const defaultRange = currentMonthRange();
+const defaultRange = getBangkokMonthRange();
 
 export function BugFilters({ categories, onChange }: Props) {
   const [search, setSearch]         = useState("");

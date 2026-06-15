@@ -4,11 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { BugReportList, Category } from "@/types";
+import { getBangkokMonthRange } from "@/lib/utils";
 import { BugReportTable } from "@/components/bugs/BugReportTable";
 import { BugFilters } from "@/components/bugs/BugFilters";
 import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Filter, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -19,11 +20,10 @@ export default function BugsPage() {
   const [isLoading, setLoading] = useState(true);
   const [page, setPage]         = useState(1);
   const [filters, setFilters]   = useState<{ search?: string; categoryId?: string; status?: string; dateFrom?: string; dateTo?: string }>(() => {
-    const now  = new Date();
-    const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-    const to   = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+    const { from, to } = getBangkokMonthRange();
     return { dateFrom: from, dateTo: to };
   });
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const { toast } = useToast();
   const toastRef = useRef(toast);
   useEffect(() => { toastRef.current = toast; }, [toast]);
@@ -66,12 +66,21 @@ export default function BugsPage() {
             {user?.role === "Admin" ? "Viewing all bug reports" : "Viewing your bug reports"}
           </p>
         </div>
-        <Button asChild>
-          <Link href="/bugs/create"><Plus className="mr-2 h-4 w-4" /> New Bug Report</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="md:hidden" onClick={() => setFiltersOpen((v) => !v)}>
+            <Filter className="mr-1.5 h-4 w-4" />
+            Filters
+            {filtersOpen ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />}
+          </Button>
+          <Button asChild>
+            <Link href="/bugs/create"><Plus className="mr-2 h-4 w-4" /> New Bug Report</Link>
+          </Button>
+        </div>
       </div>
 
-      <BugFilters categories={categories} onChange={(f) => { setFilters(f); setPage(1); }} />
+      <div className={`${filtersOpen ? "block" : "hidden"} md:block`}>
+        <BugFilters categories={categories} onChange={(f) => { setFilters(f); setPage(1); }} />
+      </div>
 
       {isLoading ? (
         <p className="text-gray-500">Loading...</p>

@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { Category } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getBangkokNow } from "@/lib/utils";
 
 interface Props {
   onChange: (filters: { month?: number; year?: number; categoryId?: string }) => void;
 }
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const currentYear = new Date().getFullYear();
+const currentYear = getBangkokNow().year;
 const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 export function DashboardFilters({ onChange }: Props) {
