@@ -26,7 +26,14 @@ export async function GET(request: Request) {
 
   const totalCount = count ?? 0;
   return NextResponse.json({
-    items:      (data ?? []).map((u) => ({ ...u, displayName: u.display_name })),
+    items:      (data ?? []).map((u) => ({
+        id:          u.id,
+        email:       u.email,
+        displayName: u.display_name,
+        role:        u.role,
+        isDisabled:  u.is_disabled,
+        createdAt:   u.created_at,
+      })),
     totalCount,
     page,
     pageSize,

@@ -26,7 +26,14 @@ export function CategoryTable({ categories, onEdit, onDelete }: Props) {
         </thead>
         <tbody>
           {categories.map((c) => (
-            <tr key={c.id} className="border-b last:border-0 hover:bg-gray-50">
+            <tr
+              key={c.id}
+              className="border-b last:border-0 hover:bg-gray-50 cursor-pointer"
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest("button")) return;
+                onEdit(c);
+              }}
+            >
               <td className="px-4 py-3 font-medium text-gray-900">{c.name}</td>
               <td className="px-4 py-3 text-gray-600">{c.description ?? "—"}</td>
               <td className="px-4 py-3 text-gray-500">{formatDate(c.createdAt)}</td>

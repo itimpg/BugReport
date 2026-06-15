@@ -1,24 +1,26 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
-import type { UserList } from "@/types";
+import type { UserList, UserManagement } from "@/types";
 import { UserTable } from "@/components/users/UserTable";
+import { UserEditDialog } from "@/components/users/UserEditDialog";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { redirect } from "next/navigation";
 import { Search } from "lucide-react";
 
 export default function UsersPage() {
   const { user } = useAuth();
   if (user?.role !== "Admin") redirect("/bugs");
 
-  const [userList, setUserList] = useState<UserList | null>(null);
-  const [isLoading, setLoading] = useState(true);
-  const [search, setSearch]     = useState("");
-  const [page, setPage]         = useState(1);
+  const [userList, setUserList]     = useState<UserList | null>(null);
+  const [isLoading, setLoading]     = useState(true);
+  const [search, setSearch]         = useState("");
+  const [page, setPage]             = useState(1);
+  const [editing, setEditing]       = useState<UserManagement | null>(null);
   const { toast } = useToast();
 
   const fetchUsers = useCallback(() => {
@@ -51,20 +53,31 @@ export default function UsersPage() {
 
       <div className="relative max-w-xs">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-        <Input placeholder="Search users..." className="pl-9" value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
+        <Input
+          placeholder="Search users..."
+          className="pl-9"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+        />
       </div>
 
       {isLoading ? (
         <p className="text-gray-500">Loading...</p>
       ) : (
         <>
-          <UserTable users={userList?.items ?? []} onRoleChange={handleRoleChange} onDisable={handleDisable} />
+          <UserTable users={userList?.items ?? []} onEdit={setEditing} />
           {userList && userList.totalPages > 1 && (
             <Pagination currentPage={page} totalPages={userList.totalPages} onPageChange={setPage} />
           )}
         </>
       )}
+
+      <UserEditDialog
+        user={editing}
+        onClose={() => setEditing(null)}
+        onRoleChange={handleRoleChange}
+        onDisable={handleDisable}
+      />
     </div>
   );
 }
