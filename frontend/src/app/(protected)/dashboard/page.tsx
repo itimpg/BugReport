@@ -18,7 +18,7 @@ export default function DashboardPage() {
   if (user?.role !== "Admin") redirect("/bugs");
   const [data, setData]         = useState<DashboardData | null>(null);
   const [isLoading, setLoading] = useState(true);
-  const [filters, setFilters]   = useState<{ month?: number; year?: number; categoryId?: string }>({});
+  const [filters, setFilters]   = useState<{ month?: number; year?: number; categoryId?: string }>({ year: new Date().getFullYear() });
   const { toast } = useToast();
   const toastRef = useRef(toast);
   useEffect(() => { toastRef.current = toast; }, [toast]);

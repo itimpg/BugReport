@@ -14,8 +14,8 @@ const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 export function DashboardFilters({ onChange }: Props) {
-  const [month, setMonth]         = useState<string>("all");
-  const [year, setYear]           = useState<string>(String(currentYear));
+  const [month, setMonth]           = useState<string>("all");
+  const [year, setYear]             = useState<string>(String(currentYear));
   const [categoryId, setCategoryId] = useState<string>("all");
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -23,17 +23,20 @@ export function DashboardFilters({ onChange }: Props) {
     api.get<Category[]>("/categories").then(setCategories).catch(() => {});
   }, []);
 
-  useEffect(() => {
+  const emit = (updates: Partial<{ month: string; year: string; categoryId: string }>) => {
+    const m  = updates.month      ?? month;
+    const y  = updates.year       ?? year;
+    const c  = updates.categoryId ?? categoryId;
     onChange({
-      month:      month      !== "all" ? Number(month) : undefined,
-      year:       year       !== "all" ? Number(year)  : undefined,
-      categoryId: categoryId !== "all" ? categoryId    : undefined,
+      month:      m !== "all" ? Number(m) : undefined,
+      year:       y !== "all" ? Number(y) : undefined,
+      categoryId: c !== "all" ? c         : undefined,
     });
-  }, [month, year, categoryId, onChange]);
+  };
 
   return (
     <div className="flex gap-2 flex-wrap">
-      <Select value={month} onValueChange={setMonth}>
+      <Select value={month} onValueChange={(v) => { setMonth(v); emit({ month: v }); }}>
         <SelectTrigger className="w-36"><SelectValue placeholder="Month" /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Months</SelectItem>
@@ -41,7 +44,7 @@ export function DashboardFilters({ onChange }: Props) {
         </SelectContent>
       </Select>
 
-      <Select value={year} onValueChange={setYear}>
+      <Select value={year} onValueChange={(v) => { setYear(v); emit({ year: v }); }}>
         <SelectTrigger className="w-28"><SelectValue placeholder="Year" /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Years</SelectItem>
@@ -49,7 +52,7 @@ export function DashboardFilters({ onChange }: Props) {
         </SelectContent>
       </Select>
 
-      <Select value={categoryId} onValueChange={setCategoryId}>
+      <Select value={categoryId} onValueChange={(v) => { setCategoryId(v); emit({ categoryId: v }); }}>
         <SelectTrigger className="w-40"><SelectValue placeholder="Category" /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Categories</SelectItem>
