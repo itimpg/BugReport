@@ -59,7 +59,7 @@ export default function BugsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Bug Reports</h1>
           <p className="text-sm text-gray-500 mt-0.5">

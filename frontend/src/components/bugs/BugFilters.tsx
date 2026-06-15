@@ -83,10 +83,10 @@ export function BugFilters({ categories, onChange }: Props) {
         </SelectContent>
       </Select>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-1 sm:flex-none">
         <Input
           type="date"
-          className="w-36"
+          className="flex-1 sm:w-36"
           value={dateFrom}
           max={dateTo || undefined}
           onChange={(e) => { setDateFrom(e.target.value); emit({ dateFrom: e.target.value }); }}
@@ -94,7 +94,7 @@ export function BugFilters({ categories, onChange }: Props) {
         <span className="text-gray-400 text-sm">—</span>
         <Input
           type="date"
-          className="w-36"
+          className="flex-1 sm:w-36"
           value={dateTo}
           min={dateFrom || undefined}
           onChange={(e) => { setDateTo(e.target.value); emit({ dateTo: e.target.value }); }}
