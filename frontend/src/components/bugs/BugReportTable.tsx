@@ -6,7 +6,7 @@ import type { BugReport } from "@/types";
 import { StatusBadge } from "@/components/bugs/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { Pencil, Trash2 } from "lucide-react";
+import { ImageOff, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
@@ -26,6 +26,7 @@ export function BugReportTable({ bugs, onDelete }: Props) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-gray-50">
+            <th className="px-3 py-3 w-14" />
             <th className="text-left px-4 py-3 font-medium text-gray-600">Title</th>
             <th className="text-left px-4 py-3 font-medium text-gray-600">Categories</th>
             <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
@@ -48,6 +49,19 @@ export function BugReportTable({ bugs, onDelete }: Props) {
                   if (canEdit) router.push(`/bugs/${b.id}/edit`);
                 }}
               >
+                <td className="px-3 py-2">
+                  {b.imageUrl ? (
+                    <img
+                      src={b.imageUrl}
+                      alt="screenshot"
+                      className="w-10 h-10 rounded object-cover border border-gray-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded bg-gray-100 border border-gray-200 flex items-center justify-center">
+                      <ImageOff className="w-4 h-4 text-gray-300" />
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-3 font-medium text-gray-900 max-w-xs truncate">{b.title}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap gap-1">

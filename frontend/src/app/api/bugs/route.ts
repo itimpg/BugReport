@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { getAuthProfile, createSupabaseServiceClient } from "@/lib/supabase/server";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
+import { encryptBuffer } from "@/lib/encryption";
 
 export async function GET(request: Request) {
   const profile = await getAuthProfile();
   if (!profile) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
-  const page       = Math.max(1, parseInt(searchParams.get("page")     ?? "1"));
-  const pageSize   = Math.max(1, parseInt(searchParams.get("pageSize") ?? "10"));
+  const page       = Math.max(1, Number.parseInt(searchParams.get("page")     ?? "1"));
+  const pageSize   = Math.max(1, Number.parseInt(searchParams.get("pageSize") ?? "10"));
   const search     = searchParams.get("search")     ?? "";
   const categoryId = searchParams.get("categoryId") ?? "";
   const status     = searchParams.get("status")     ?? "";
@@ -54,14 +55,6 @@ export async function GET(request: Request) {
   const { data: bugs, count, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Batch signed URLs for images
-  const imagePaths = bugs?.filter((b) => b.image_url).map((b) => b.image_url!) ?? [];
-  const signedUrls: Record<string, string> = {};
-  if (imagePaths.length > 0) {
-    const { data: urls } = await service.storage.from("bug-images").createSignedUrls(imagePaths, 3600);
-    urls?.forEach((u) => { if (u.signedUrl && u.path) signedUrls[u.path] = u.signedUrl; });
-  }
-
   const items = (bugs ?? []).map((b) => ({
     id:           b.id,
     title:        b.title,
@@ -69,7 +62,7 @@ export async function GET(request: Request) {
     solution:     b.solution ?? undefined,
     status:       b.status,
     incidentDate: b.incident_date,
-    imageUrl:     b.image_url ? signedUrls[b.image_url] : undefined,
+    imageUrl:     b.image_url ? `/api/images/${b.image_url}` : undefined,
     reportedBy:   b.reported_by,
     reporterName: (b.users as any)?.display_name ?? "Unknown",
     createdAt:    b.created_at,
@@ -101,12 +94,13 @@ export async function POST(request: Request) {
   let imagePath: string | null = null;
 
   if (image && image.size > 0) {
-    const ext      = image.name.split(".").pop() ?? "jpg";
-    const fileName = `${randomUUID()}.${ext}`;
-    const buffer   = Buffer.from(await image.arrayBuffer());
+    const ext             = image.name.split(".").pop() ?? "jpg";
+    const fileName        = `${randomUUID()}.${ext}.enc`;
+    const raw             = Buffer.from(await image.arrayBuffer());
+    const encrypted       = encryptBuffer(raw);
     const { error: uploadError } = await service.storage
       .from("bug-images")
-      .upload(fileName, buffer, { contentType: image.type });
+      .upload(fileName, encrypted, { contentType: "application/octet-stream" });
     if (!uploadError) imagePath = fileName;
   }
 

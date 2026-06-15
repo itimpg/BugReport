@@ -34,7 +34,15 @@ export function BugReportForm({ bug }: Props) {
   const [categories, setCategories]     = useState<Category[]>([]);
   const [selectedCats, setSelectedCats] = useState<string[]>(bug?.categories.map((c) => c.id) ?? []);
   const [imageFile, setImageFile]       = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setSubmitting]   = useState(false);
+
+  useEffect(() => {
+    if (!imageFile) { setImagePreview(null); return; }
+    const url = URL.createObjectURL(imageFile);
+    setImagePreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile]);
 
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -152,9 +160,11 @@ export function BugReportForm({ bug }: Props) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="image">Screenshot / Image</Label>
+        <Label htmlFor="image">{isEdit ? "Replace Image" : "Screenshot / Image"}</Label>
         <Input id="image" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
-        {bug?.imageUrl && <p className="text-xs text-gray-500">Current image: <a href={bug.imageUrl} target="_blank" rel="noreferrer" className="text-blue-500 underline">view</a></p>}
+        {imagePreview && (
+          <img src={imagePreview} alt="New image preview" className="mt-2 max-h-48 rounded-lg object-contain border" />
+        )}
       </div>
 
       <div className="flex gap-3 pt-2">

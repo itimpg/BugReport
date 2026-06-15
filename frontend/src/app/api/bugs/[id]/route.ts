@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthProfile, createSupabaseServiceClient } from "@/lib/supabase/server";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
+import { encryptBuffer } from "@/lib/encryption";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -28,11 +29,7 @@ export async function GET(_req: Request, { params }: Params) {
   if (profile.role !== "Admin" && bug.reported_by !== profile.id)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  let imageUrl: string | undefined;
-  if (bug.image_url) {
-    const { data } = await service.storage.from("bug-images").createSignedUrl(bug.image_url, 3600);
-    imageUrl = data?.signedUrl ?? undefined;
-  }
+  const imageUrl = bug.image_url ? `/api/images/${bug.image_url}` : undefined;
 
   return NextResponse.json({
     id:           bug.id,
@@ -81,16 +78,16 @@ export async function PUT(request: Request, { params }: Params) {
   let imagePath = existing.image_url as string | null;
 
   if (image && image.size > 0) {
-    // Delete old image
     if (existing.image_url) {
       await service.storage.from("bug-images").remove([existing.image_url]);
     }
-    const ext      = image.name.split(".").pop() ?? "jpg";
-    const fileName = `${randomUUID()}.${ext}`;
-    const buffer   = Buffer.from(await image.arrayBuffer());
+    const ext             = image.name.split(".").pop() ?? "jpg";
+    const fileName        = `${randomUUID()}.${ext}.enc`;
+    const raw             = Buffer.from(await image.arrayBuffer());
+    const encrypted       = encryptBuffer(raw);
     const { error: uploadError } = await service.storage
       .from("bug-images")
-      .upload(fileName, buffer, { contentType: image.type });
+      .upload(fileName, encrypted, { contentType: "application/octet-stream" });
     if (!uploadError) imagePath = fileName;
   }
 

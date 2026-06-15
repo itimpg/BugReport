@@ -19,6 +19,15 @@ export default function EditBugPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       <h1 className="text-2xl font-bold text-gray-900">Edit Bug Report</h1>
+      {bug.imageUrl && (
+        <div className="rounded-xl border bg-white overflow-hidden">
+          <img
+            src={bug.imageUrl}
+            alt="Bug screenshot"
+            className="w-full max-h-80 object-contain"
+          />
+        </div>
+      )}
       <BugReportForm bug={bug} />
     </div>
   );
