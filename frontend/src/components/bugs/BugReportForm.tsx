@@ -26,6 +26,12 @@ type FormValues = z.infer<typeof schema>;
 
 interface Props { bug?: BugReport }
 
+/** Convert a UTC ISO string (or now) to a YYYY-MM-DDTHH:MM string in Bangkok time. */
+function toBangkokLocal(utcIso?: string): string {
+  const ms = utcIso ? new Date(utcIso).getTime() : Date.now();
+  return new Date(ms + 7 * 3_600_000).toISOString().slice(0, 16);
+}
+
 export function BugReportForm({ bug }: Props) {
   const isEdit = !!bug;
   const router = useRouter();
@@ -50,7 +56,7 @@ export function BugReportForm({ bug }: Props) {
       title:        bug?.title       ?? "",
       description:  bug?.description ?? "",
       solution:     bug?.solution    ?? "",
-      incidentDate: bug?.incidentDate ? bug.incidentDate.slice(0, 16) : new Date().toISOString().slice(0, 16),
+      incidentDate: toBangkokLocal(bug?.incidentDate),
       status:       bug?.status      ?? "Open",
     },
   });
@@ -69,7 +75,7 @@ export function BugReportForm({ bug }: Props) {
       form.append("title",        values.title);
       form.append("description",  values.description);
       if (values.solution)     form.append("solution",     values.solution);
-      if (values.incidentDate) form.append("incidentDate", values.incidentDate);
+      if (values.incidentDate) form.append("incidentDate", `${values.incidentDate}:00+07:00`);
       if (values.status)       form.append("status",       values.status);
       selectedCats.forEach((id) => form.append("categoryIds", id));
       if (imageFile) form.append("image", imageFile);
