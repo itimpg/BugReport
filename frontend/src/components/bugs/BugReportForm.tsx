@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { Camera, Images } from "lucide-react";
 
 const schema = z.object({
   title:       z.string().min(1, "Title is required").max(500),
@@ -42,6 +43,10 @@ export function BugReportForm({ bug }: Props) {
   const [imageFile, setImageFile]       = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setSubmitting]   = useState(false);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef  = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (file: File | undefined) => setImageFile(file ?? null);
 
   useEffect(() => {
     if (!imageFile) { setImagePreview(null); return; }
@@ -166,10 +171,23 @@ export function BugReportForm({ bug }: Props) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="image">{isEdit ? "Replace Image" : "Screenshot / Image"}</Label>
-        <Input id="image" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
+        <Label>{isEdit ? "Replace Image" : "Screenshot / Image"}</Label>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={() => galleryRef.current?.click()}>
+            <Images className="mr-1.5 w-4 h-4" /> Gallery
+          </Button>
+          <Button type="button" variant="outline" size="sm" onClick={() => cameraRef.current?.click()}>
+            <Camera className="mr-1.5 w-4 h-4" /> Camera
+          </Button>
+        </div>
+        {/* Hidden inputs — gallery and camera are separate so capture doesn't block gallery */}
+        <input ref={galleryRef} type="file" accept="image/*" className="hidden"
+          onChange={(e) => handleImageChange(e.target.files?.[0])} />
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
+          onChange={(e) => handleImageChange(e.target.files?.[0])} />
+        {imageFile && <p className="text-xs text-gray-500 truncate">{imageFile.name}</p>}
         {imagePreview && (
-          <img src={imagePreview} alt="New image preview" className="mt-2 max-h-48 rounded-lg object-contain border" />
+          <img src={imagePreview} alt="New image preview" className="mt-1 max-h-48 rounded-lg object-contain border" />
         )}
       </div>
 
