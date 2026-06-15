@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { Category } from "@/types";
 import { CategoryTable } from "@/components/categories/CategoryTable";
@@ -20,14 +20,16 @@ export default function CategoriesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing]       = useState<Category | null>(null);
   const { toast } = useToast();
+  const toastRef = useRef(toast);
+  useEffect(() => { toastRef.current = toast; }, [toast]);
 
   const fetchCategories = useCallback(() => {
     setLoading(true);
     api.get<Category[]>("/categories")
       .then(setCategories)
-      .catch(() => toast({ title: "Error", description: "Failed to load categories.", variant: "destructive" }))
+      .catch(() => toastRef.current({ title: "Error", description: "Failed to load categories.", variant: "destructive" }))
       .finally(() => setLoading(false));
-  }, [toast]);
+  }, []);
 
   useEffect(() => { fetchCategories(); }, [fetchCategories]);
 

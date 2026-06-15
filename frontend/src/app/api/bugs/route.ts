@@ -12,6 +12,8 @@ export async function GET(request: Request) {
   const search     = searchParams.get("search")     ?? "";
   const categoryId = searchParams.get("categoryId") ?? "";
   const status     = searchParams.get("status")     ?? "";
+  const dateFrom   = searchParams.get("dateFrom")   ?? "";
+  const dateTo     = searchParams.get("dateTo")     ?? "";
   const offset     = (page - 1) * pageSize;
 
   const service = createSupabaseServiceClient();
@@ -32,7 +34,7 @@ export async function GET(request: Request) {
   let query = service
     .from("bug_reports")
     .select(
-      `id, title, description, status, incident_date, image_url,
+      `id, title, description, solution, status, incident_date, image_url,
        reported_by, created_at, updated_at,
        users!reported_by ( display_name ),
        bug_report_categories ( categories ( id, name ) )`,
@@ -46,6 +48,8 @@ export async function GET(request: Request) {
   if (status)                   query = query.eq("status", status);
   if (categoryBugIds)           query = query.in("id", categoryBugIds);
   if (search)                   query = query.textSearch("title", search, { type: "websearch" });
+  if (dateFrom)                 query = query.gte("created_at", `${dateFrom}T00:00:00.000Z`);
+  if (dateTo)                   query = query.lte("created_at", `${dateTo}T23:59:59.999Z`);
 
   const { data: bugs, count, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -62,6 +66,7 @@ export async function GET(request: Request) {
     id:           b.id,
     title:        b.title,
     description:  b.description,
+    solution:     b.solution ?? undefined,
     status:       b.status,
     incidentDate: b.incident_date,
     imageUrl:     b.image_url ? signedUrls[b.image_url] : undefined,
@@ -84,6 +89,7 @@ export async function POST(request: Request) {
   const formData    = await request.formData();
   const title       = formData.get("title")        as string;
   const description = formData.get("description")  as string;
+  const solution    = formData.get("solution")     as string | null;
   const incidentDate= formData.get("incidentDate") as string | null;
   const categoryIds = formData.getAll("categoryIds") as string[];
   const image       = formData.get("image") as File | null;
@@ -109,6 +115,7 @@ export async function POST(request: Request) {
     .insert({
       title,
       description,
+      solution:      solution || null,
       incident_date: incidentDate ? new Date(incidentDate).toISOString() : new Date().toISOString(),
       image_url:     imagePath,
       reported_by:   profile.id,

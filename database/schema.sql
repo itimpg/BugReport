@@ -21,6 +21,7 @@ CREATE TABLE users (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email       VARCHAR(255) NOT NULL UNIQUE,
     display_name VARCHAR(255) NOT NULL,
+    solution    VARCHAR(255) NULL,
     role        user_role NOT NULL DEFAULT 'User',
     is_disabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { BugReportList, Category } from "@/types";
@@ -18,21 +18,30 @@ export default function BugsPage() {
   const [categories, setCats]   = useState<Category[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [page, setPage]         = useState(1);
-  const [filters, setFilters]   = useState<{ search?: string; categoryId?: string; status?: string }>({});
+  const [filters, setFilters]   = useState<{ search?: string; categoryId?: string; status?: string; dateFrom?: string; dateTo?: string }>(() => {
+    const now  = new Date();
+    const from = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+    const to   = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+    return { dateFrom: from, dateTo: to };
+  });
   const { toast } = useToast();
+  const toastRef = useRef(toast);
+  useEffect(() => { toastRef.current = toast; }, [toast]);
 
   const fetchBugs = useCallback(() => {
     const params = new URLSearchParams({ page: String(page), pageSize: "10" });
     if (filters.search)     params.set("search",     filters.search);
     if (filters.categoryId) params.set("categoryId", filters.categoryId);
     if (filters.status)     params.set("status",     filters.status);
+    if (filters.dateFrom)   params.set("dateFrom",   filters.dateFrom);
+    if (filters.dateTo)     params.set("dateTo",     filters.dateTo);
 
     setLoading(true);
     api.get<BugReportList>(`/bugs?${params}`)
       .then(setBugList)
-      .catch(() => toast({ title: "Error", description: "Failed to load bugs.", variant: "destructive" }))
+      .catch(() => toastRef.current({ title: "Error", description: "Failed to load bugs.", variant: "destructive" }))
       .finally(() => setLoading(false));
-  }, [page, filters, toast]);
+  }, [page, filters]);
 
   useEffect(() => {
     api.get<Category[]>("/categories").then(setCats).catch(() => {});

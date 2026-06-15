@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
 import type { DashboardData } from "@/types";
@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const [isLoading, setLoading] = useState(true);
   const [filters, setFilters]   = useState<{ month?: number; year?: number; categoryId?: string }>({});
   const { toast } = useToast();
+  const toastRef = useRef(toast);
+  useEffect(() => { toastRef.current = toast; }, [toast]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -30,9 +32,9 @@ export default function DashboardPage() {
     setLoading(true);
     api.get<DashboardData>(`/reports/dashboard?${params}`)
       .then(setData)
-      .catch(() => toast({ title: "Error", description: "Failed to load dashboard.", variant: "destructive" }))
+      .catch(() => toastRef.current({ title: "Error", description: "Failed to load dashboard.", variant: "destructive" }))
       .finally(() => setLoading(false));
-  }, [filters, toast]);
+  }, [filters]);
 
   if (isLoading) return <div className="flex items-center justify-center h-full"><p className="text-gray-500">Loading dashboard...</p></div>;
   if (!data)     return null;

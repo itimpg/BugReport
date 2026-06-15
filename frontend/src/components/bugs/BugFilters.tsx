@@ -6,31 +6,57 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
 
+interface Filters {
+  search?: string;
+  categoryId?: string;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 interface Props {
   categories: Category[];
-  onChange: (filters: { search?: string; categoryId?: string; status?: string }) => void;
+  onChange: (filters: Filters) => void;
 }
 
 const STATUSES = ["Open", "InProgress", "Resolved", "Closed"];
+
+function currentMonthRange() {
+  const now = new Date();
+  const from = new Date(now.getFullYear(), now.getMonth(), 1);
+  const to   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return {
+    from: from.toISOString().slice(0, 10),
+    to:   to.toISOString().slice(0, 10),
+  };
+}
+
+const defaultRange = currentMonthRange();
 
 export function BugFilters({ categories, onChange }: Props) {
   const [search, setSearch]         = useState("");
   const [categoryId, setCategoryId] = useState("all");
   const [status, setStatus]         = useState("all");
+  const [dateFrom, setDateFrom]     = useState(defaultRange.from);
+  const [dateTo, setDateTo]         = useState(defaultRange.to);
 
-  const emit = (updates: Partial<{ search: string; categoryId: string; status: string }>) => {
-    const s  = updates.search     ?? search;
-    const c  = updates.categoryId ?? categoryId;
-    const st = updates.status     ?? status;
+  const emit = (updates: Partial<{ search: string; categoryId: string; status: string; dateFrom: string; dateTo: string }>) => {
+    const s   = updates.search     ?? search;
+    const c   = updates.categoryId ?? categoryId;
+    const st  = updates.status     ?? status;
+    const df  = updates.dateFrom   ?? dateFrom;
+    const dt  = updates.dateTo     ?? dateTo;
     onChange({
       search:     s  || undefined,
       categoryId: c  !== "all" ? c  : undefined,
       status:     st !== "all" ? st : undefined,
+      dateFrom:   df || undefined,
+      dateTo:     dt || undefined,
     });
   };
 
   return (
-    <div className="flex gap-3 flex-wrap">
+    <div className="flex gap-3 flex-wrap items-center">
       <div className="relative flex-1 min-w-[200px]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input
@@ -56,6 +82,24 @@ export function BugFilters({ categories, onChange }: Props) {
           {STATUSES.map((s) => <SelectItem key={s} value={s}>{s === "InProgress" ? "In Progress" : s}</SelectItem>)}
         </SelectContent>
       </Select>
+
+      <div className="flex items-center gap-2">
+        <Input
+          type="date"
+          className="w-36"
+          value={dateFrom}
+          max={dateTo || undefined}
+          onChange={(e) => { setDateFrom(e.target.value); emit({ dateFrom: e.target.value }); }}
+        />
+        <span className="text-gray-400 text-sm">—</span>
+        <Input
+          type="date"
+          className="w-36"
+          value={dateTo}
+          min={dateFrom || undefined}
+          onChange={(e) => { setDateTo(e.target.value); emit({ dateTo: e.target.value }); }}
+        />
+      </div>
     </div>
   );
 }

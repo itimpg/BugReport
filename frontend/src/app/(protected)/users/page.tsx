@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { redirect } from "next/navigation";
 import { api } from "@/lib/api";
 import type { UserList, UserManagement } from "@/types";
@@ -22,6 +22,8 @@ export default function UsersPage() {
   const [page, setPage]             = useState(1);
   const [editing, setEditing]       = useState<UserManagement | null>(null);
   const { toast } = useToast();
+  const toastRef = useRef(toast);
+  useEffect(() => { toastRef.current = toast; }, [toast]);
 
   const fetchUsers = useCallback(() => {
     const params = new URLSearchParams({ page: String(page), pageSize: "10" });
@@ -29,9 +31,9 @@ export default function UsersPage() {
     setLoading(true);
     api.get<UserList>(`/users?${params}`)
       .then(setUserList)
-      .catch(() => toast({ title: "Error", description: "Failed to load users.", variant: "destructive" }))
+      .catch(() => toastRef.current({ title: "Error", description: "Failed to load users.", variant: "destructive" }))
       .finally(() => setLoading(false));
-  }, [page, search, toast]);
+  }, [page, search]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 

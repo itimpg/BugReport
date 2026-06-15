@@ -27,6 +27,7 @@ export interface BugReport {
   id: string;
   title: string;
   description: string;
+  solution?: string;
   status: BugStatus;
   incidentDate: string;
   imageUrl?: string;

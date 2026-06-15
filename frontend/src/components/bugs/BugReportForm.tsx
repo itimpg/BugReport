@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const schema = z.object({
   title:       z.string().min(1, "Title is required").max(500),
   description: z.string().min(1, "Description is required"),
+  solution:    z.string().optional(),
   incidentDate:z.string().optional(),
   status:      z.string().optional(),
 });
@@ -35,11 +36,12 @@ export function BugReportForm({ bug }: Props) {
   const [imageFile, setImageFile]       = useState<File | null>(null);
   const [isSubmitting, setSubmitting]   = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       title:        bug?.title       ?? "",
       description:  bug?.description ?? "",
+      solution:     bug?.solution    ?? "",
       incidentDate: bug?.incidentDate ? bug.incidentDate.slice(0, 16) : new Date().toISOString().slice(0, 16),
       status:       bug?.status      ?? "Open",
     },
@@ -58,6 +60,7 @@ export function BugReportForm({ bug }: Props) {
       const form = new FormData();
       form.append("title",        values.title);
       form.append("description",  values.description);
+      if (values.solution)     form.append("solution",     values.solution);
       if (values.incidentDate) form.append("incidentDate", values.incidentDate);
       if (values.status)       form.append("status",       values.status);
       selectedCats.forEach((id) => form.append("categoryIds", id));
@@ -99,6 +102,17 @@ export function BugReportForm({ bug }: Props) {
       </div>
 
       <div className="space-y-1.5">
+        <Label htmlFor="solution">How to Solve</Label>
+        <textarea
+          id="solution"
+          {...register("solution")}
+          rows={3}
+          placeholder="Steps or notes on how to resolve this bug..."
+          className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      </div>
+
+      <div className="space-y-1.5">
         <Label htmlFor="incidentDate">Incident Date</Label>
         <Input id="incidentDate" type="datetime-local" {...register("incidentDate")} />
       </div>
@@ -106,7 +120,7 @@ export function BugReportForm({ bug }: Props) {
       {(isEdit && user?.role === "Admin") && (
         <div className="space-y-1.5">
           <Label>Status</Label>
-          <Select defaultValue={bug?.status} onValueChange={(v) => {}}>
+          <Select defaultValue={bug?.status} onValueChange={(v) => setValue("status", v)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               {["Open","InProgress","Resolved","Closed"].map((s) => (

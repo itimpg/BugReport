@@ -14,7 +14,7 @@ export async function GET(_req: Request, { params }: Params) {
   const { data: bug, error } = await service
     .from("bug_reports")
     .select(
-      `id, title, description, status, incident_date, image_url,
+      `id, title, description, solution, status, incident_date, image_url,
        reported_by, created_at, updated_at,
        users!reported_by ( display_name ),
        bug_report_categories ( categories ( id, name ) )`
@@ -38,6 +38,7 @@ export async function GET(_req: Request, { params }: Params) {
     id:           bug.id,
     title:        bug.title,
     description:  bug.description,
+    solution:     bug.solution ?? undefined,
     status:       bug.status,
     incidentDate: bug.incident_date,
     imageUrl,
@@ -71,6 +72,7 @@ export async function PUT(request: Request, { params }: Params) {
   const formData     = await request.formData();
   const title        = formData.get("title")        as string;
   const description  = formData.get("description")  as string;
+  const solution     = formData.get("solution")     as string | null;
   const incidentDate = formData.get("incidentDate") as string | null;
   const status       = formData.get("status")       as string | null;
   const categoryIds  = formData.getAll("categoryIds") as string[];
@@ -95,6 +97,7 @@ export async function PUT(request: Request, { params }: Params) {
   const updateData: Record<string, unknown> = {};
   if (title)        updateData.title        = title;
   if (description)  updateData.description  = description;
+  updateData.solution   = solution || null;
   if (incidentDate) updateData.incident_date = new Date(incidentDate).toISOString();
   if (status && profile.role === "Admin") updateData.status = status;
   updateData.image_url = imagePath;
