@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet list *)",
+      "Bash(Select-String -Pattern \"error|Error|Build succeeded|Build FAILED\")",
+      "Bash(Select-Object -Last 20)",
+      "PowerShell(dotnet package search \"Npgsql.EntityFrameworkCore.PostgreSQL\" --take 5 2>&1)",
+      "PowerShell(Test-NetConnection -ComputerName \"db.jgsrebitaxhcejujlgef.supabase.co\" -Port 5432 -WarningAction SilentlyContinue)",
+      "PowerShell(Test-NetConnection -ComputerName \"db.jgsrebitaxhcejujlgef.supabase.co\" -Port 6543 -WarningAction SilentlyContinue)"
+    ]
+  }
+}

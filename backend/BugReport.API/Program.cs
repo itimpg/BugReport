@@ -1,4 +1,3 @@
-using System.Text;
 using BugReport.API.Middleware;
 using BugReport.Core.Interfaces;
 using BugReport.Infrastructure.Data;
@@ -12,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Supabase;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,23 +48,23 @@ builder.Services.AddScoped<IStorageService, SupabaseStorageService>();
 
 // ── JWT Authentication ────────────────────────────────────────────────────────
 var jwtSection = builder.Configuration.GetSection("Jwt");
-var secretKey   = jwtSection["SecretKey"]!;
-var issuer      = jwtSection["Issuer"]!;
-var audience    = jwtSection["Audience"]!;
+var secretKey = jwtSection["SecretKey"]!;
+var issuer = jwtSection["Issuer"]!;
+var audience = jwtSection["Audience"]!;
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opts =>
     {
         opts.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer           = true,
-            ValidateAudience         = true,
-            ValidateLifetime         = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer              = issuer,
-            ValidAudience            = audience,
-            IssuerSigningKey         = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-            ClockSkew                = TimeSpan.Zero
+            ValidIssuer = issuer,
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            ClockSkew = TimeSpan.Zero
         };
     });
 
@@ -95,11 +95,11 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "BugReport API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In          = ParameterLocation.Header,
+        In = ParameterLocation.Header,
         Description = "Enter: Bearer {token}",
-        Name        = "Authorization",
-        Type        = SecuritySchemeType.ApiKey,
-        Scheme      = "Bearer"
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
