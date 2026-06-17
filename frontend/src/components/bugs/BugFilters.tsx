@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Category } from "@/types";
+import type { Category, IssuerGroup } from "@/types";
+import { api } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, ChevronDown, Tag, X } from "lucide-react";
@@ -10,6 +11,7 @@ import { getBangkokMonthRange } from "@/lib/utils";
 interface Filters {
   search?: string;
   categoryIds?: string[];
+  issuerGroupId?: string;
   status?: string;
   dateFrom?: string;
   dateTo?: string;
@@ -27,10 +29,16 @@ export function BugFilters({ categories, onChange }: Props) {
   const [search, setSearch]           = useState("");
   const [selectedCatIds, setSelectedCatIds] = useState<string[]>([]);
   const [catDropOpen, setCatDropOpen] = useState(false);
+  const [issuerGroups, setIssuerGroups] = useState<IssuerGroup[]>([]);
+  const [issuerGroupId, setIssuerGroupId] = useState("all");
   const [status, setStatus]           = useState("all");
   const [dateFrom, setDateFrom]       = useState(defaultRange.from);
   const [dateTo, setDateTo]           = useState(defaultRange.to);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    api.get<IssuerGroup[]>("/issuer-groups").then(setIssuerGroups).catch(() => {});
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -41,18 +49,20 @@ export function BugFilters({ categories, onChange }: Props) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const emit = (updates: Partial<{ search: string; categoryIds: string[]; status: string; dateFrom: string; dateTo: string }>) => {
-    const s   = updates.search      ?? search;
-    const c   = updates.categoryIds ?? selectedCatIds;
-    const st  = updates.status      ?? status;
-    const df  = updates.dateFrom    ?? dateFrom;
-    const dt  = updates.dateTo      ?? dateTo;
+  const emit = (updates: Partial<{ search: string; categoryIds: string[]; issuerGroupId: string; status: string; dateFrom: string; dateTo: string }>) => {
+    const s   = updates.search        ?? search;
+    const c   = updates.categoryIds   ?? selectedCatIds;
+    const ig  = updates.issuerGroupId ?? issuerGroupId;
+    const st  = updates.status        ?? status;
+    const df  = updates.dateFrom      ?? dateFrom;
+    const dt  = updates.dateTo        ?? dateTo;
     onChange({
-      search:      s  || undefined,
-      categoryIds: c.length > 0 ? c : undefined,
-      status:      st !== "all" ? st : undefined,
-      dateFrom:    df || undefined,
-      dateTo:      dt || undefined,
+      search:        s  || undefined,
+      categoryIds:   c.length > 0 ? c : undefined,
+      issuerGroupId: ig !== "all" ? ig : undefined,
+      status:        st !== "all" ? st : undefined,
+      dateFrom:      df || undefined,
+      dateTo:        dt || undefined,
     });
   };
 
@@ -131,6 +141,14 @@ export function BugFilters({ categories, onChange }: Props) {
           </div>
         )}
       </div>
+
+      <Select value={issuerGroupId} onValueChange={(v) => { setIssuerGroupId(v); emit({ issuerGroupId: v }); }}>
+        <SelectTrigger className="w-44"><SelectValue placeholder="Issuer Group" /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Issuer Groups</SelectItem>
+          {issuerGroups.map((g) => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}
+        </SelectContent>
+      </Select>
 
       <Select value={status} onValueChange={(v) => { setStatus(v); emit({ status: v }); }}>
         <SelectTrigger className="w-36"><SelectValue placeholder="Status" /></SelectTrigger>

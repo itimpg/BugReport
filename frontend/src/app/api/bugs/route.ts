@@ -11,8 +11,9 @@ export async function GET(request: Request) {
   const page       = Math.max(1, Number.parseInt(searchParams.get("page")     ?? "1"));
   const pageSize   = Math.max(1, Number.parseInt(searchParams.get("pageSize") ?? "10"));
   const search     = searchParams.get("search")     ?? "";
-  const categoryIds = searchParams.getAll("categoryId");
-  const status     = searchParams.get("status")     ?? "";
+  const categoryIds   = searchParams.getAll("categoryId");
+  const issuerGroupId = searchParams.get("issuerGroupId") ?? "";
+  const status        = searchParams.get("status")        ?? "";
   const dateFrom   = searchParams.get("dateFrom")   ?? "";
   const dateTo     = searchParams.get("dateTo")     ?? "";
   const offset     = (page - 1) * pageSize;
@@ -36,9 +37,10 @@ export async function GET(request: Request) {
     .from("bug_reports")
     .select(
       `id, title, description, solution, status, incident_date, image_url,
-       reported_by, created_at, updated_at,
+       issuer_group_id, reported_by, created_at, updated_at,
        users!reported_by ( display_name ),
-       bug_report_categories ( categories ( id, name ) )`,
+       bug_report_categories ( categories ( id, name ) ),
+       issuer_groups ( id, name )`,
       { count: "exact" }
     )
     .eq("is_deleted", false)
@@ -47,6 +49,7 @@ export async function GET(request: Request) {
 
   if (profile.role !== "Admin") query = query.eq("reported_by", profile.id);
   if (status)                   query = query.eq("status", status);
+  if (issuerGroupId)            query = query.eq("issuer_group_id", issuerGroupId);
   if (categoryBugIds)           query = query.in("id", categoryBugIds);
   if (search)                   query = query.textSearch("title", search, { type: "websearch" });
   if (dateFrom)                 query = query.gte("created_at", new Date(`${dateFrom}T00:00:00.000+07:00`).toISOString());
@@ -62,8 +65,10 @@ export async function GET(request: Request) {
     solution:     b.solution ?? undefined,
     status:       b.status,
     incidentDate: b.incident_date,
-    imageUrl:     b.image_url ? `/api/images/${b.image_url}` : undefined,
-    reportedBy:   b.reported_by,
+    imageUrl:        b.image_url ? `/api/images/${b.image_url}` : undefined,
+    issuerGroupId:   b.issuer_group_id ?? undefined,
+    issuerGroupName: b.issuer_groups?.[0]?.name ?? undefined,
+    reportedBy:      b.reported_by,
     reporterName: (b.users as any)?.display_name ?? "Unknown",
     createdAt:    b.created_at,
     updatedAt:    b.updated_at,
@@ -84,8 +89,9 @@ export async function POST(request: Request) {
   const description = formData.get("description")  as string;
   const solution    = formData.get("solution")     as string | null;
   const incidentDate= formData.get("incidentDate") as string | null;
-  const categoryIds = formData.getAll("categoryIds") as string[];
-  const image       = formData.get("image") as File | null;
+  const issuerGroupId = formData.get("issuerGroupId") as string | null;
+  const categoryIds   = formData.getAll("categoryIds") as string[];
+  const image         = formData.get("image") as File | null;
 
   if (!title || !description)
     return NextResponse.json({ error: "Title and description are required" }, { status: 400 });
@@ -110,9 +116,10 @@ export async function POST(request: Request) {
       title,
       description,
       solution:      solution || null,
-      incident_date: incidentDate ? new Date(incidentDate).toISOString() : new Date().toISOString(),
-      image_url:     imagePath,
-      reported_by:   profile.id,
+      incident_date:   incidentDate ? new Date(incidentDate).toISOString() : new Date().toISOString(),
+      issuer_group_id: issuerGroupId || null,
+      image_url:       imagePath,
+      reported_by:     profile.id,
     })
     .select()
     .single();

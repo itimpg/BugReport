@@ -11,7 +11,11 @@
       "PowerShell(cd \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\" && npm run dev 2>&1 &)",
       "PowerShell(cd \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\" && Start-Process pwsh -ArgumentList '-NoProfile','-Command','npm run dev' -WorkingDirectory \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\")",
       "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\\\\src\\\\app\\\\api\\\\issuer-groups\\\\[id]\" && mkdir -p \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\\\\src\\\\components\\\\issuer-groups\" && mkdir -p \"c:\\\\Users\\\\cchairin\\\\Documents\\\\Projects\\\\New folder\\\\BugReport\\\\frontend\\\\src\\\\app\\\\\\(protected\\)\\\\issuer-groups\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\cchairin\\Documents\\Projects\\New folder\\BugReport\\frontend\\src\\app\\api\\issuer-groups"
     ]
   }
 }

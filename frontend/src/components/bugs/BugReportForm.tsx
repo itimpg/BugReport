@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import type { BugReport, Category } from "@/types";
+import type { BugReport, Category, IssuerGroup } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,8 +38,10 @@ export function BugReportForm({ bug }: Props) {
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [categories, setCategories]     = useState<Category[]>([]);
-  const [selectedCats, setSelectedCats] = useState<string[]>(bug?.categories.map((c) => c.id) ?? []);
+  const [categories, setCategories]         = useState<Category[]>([]);
+  const [selectedCats, setSelectedCats]     = useState<string[]>(bug?.categories.map((c) => c.id) ?? []);
+  const [issuerGroups, setIssuerGroups]     = useState<IssuerGroup[]>([]);
+  const [issuerGroupId, setIssuerGroupId]   = useState<string>(bug?.issuerGroupId ?? "none");
   const [imageFile, setImageFile]       = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setSubmitting]   = useState(false);
@@ -68,6 +70,7 @@ export function BugReportForm({ bug }: Props) {
 
   useEffect(() => {
     api.get<Category[]>("/categories").then(setCategories).catch(() => {});
+    api.get<IssuerGroup[]>("/issuer-groups").then(setIssuerGroups).catch(() => {});
   }, []);
 
   const toggleCat = (id: string) =>
@@ -82,6 +85,7 @@ export function BugReportForm({ bug }: Props) {
       if (values.solution)     form.append("solution",     values.solution);
       if (values.incidentDate) form.append("incidentDate", `${values.incidentDate}:00+07:00`);
       if (values.status)       form.append("status",       values.status);
+      if (issuerGroupId && issuerGroupId !== "none") form.append("issuerGroupId", issuerGroupId);
       selectedCats.forEach((id) => form.append("categoryIds", id));
       if (imageFile) form.append("image", imageFile);
 
@@ -149,6 +153,19 @@ export function BugReportForm({ bug }: Props) {
           </Select>
         </div>
       )}
+
+      <div className="space-y-1.5">
+        <Label>Issuer Group</Label>
+        <Select value={issuerGroupId} onValueChange={setIssuerGroupId}>
+          <SelectTrigger><SelectValue placeholder="Select issuer group" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">— None —</SelectItem>
+            {issuerGroups.map((g) => (
+              <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <div className="space-y-1.5">
         <Label>Categories</Label>

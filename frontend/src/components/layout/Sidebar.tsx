@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import { Bug, LayoutDashboard, Tag, Users, X } from "lucide-react";
+import { Bug, Building2, LayoutDashboard, Tag, Users, X } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -14,8 +14,9 @@ interface Props {
 const navItems = [
   { href: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard, adminOnly: true  },
   { href: "/bugs",       label: "Bug Reports", icon: Bug,             adminOnly: false },
-  { href: "/categories", label: "Categories",  icon: Tag,             adminOnly: true  },
-  { href: "/users",      label: "Users",       icon: Users,           adminOnly: true  },
+  { href: "/categories",    label: "Categories",   icon: Tag,       adminOnly: true  },
+  { href: "/issuer-groups", label: "Issuer Groups", icon: Building2, adminOnly: true  },
+  { href: "/users",         label: "Users",         icon: Users,     adminOnly: true  },
 ];
 
 export function Sidebar({ open, onClose }: Readonly<Props>) {

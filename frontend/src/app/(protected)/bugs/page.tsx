@@ -19,7 +19,7 @@ export default function BugsPage() {
   const [categories, setCats]   = useState<Category[]>([]);
   const [isLoading, setLoading] = useState(true);
   const [page, setPage]         = useState(1);
-  const [filters, setFilters]   = useState<{ search?: string; categoryIds?: string[]; status?: string; dateFrom?: string; dateTo?: string }>(() => {
+  const [filters, setFilters]   = useState<{ search?: string; categoryIds?: string[]; issuerGroupId?: string; status?: string; dateFrom?: string; dateTo?: string }>(() => {
     const { from, to } = getBangkokMonthRange();
     return { dateFrom: from, dateTo: to };
   });
@@ -30,9 +30,10 @@ export default function BugsPage() {
 
   const fetchBugs = useCallback(() => {
     const params = new URLSearchParams({ page: String(page), pageSize: "10" });
-    if (filters.search)                    params.set("search",  filters.search);
+    if (filters.search)                    params.set("search",        filters.search);
     filters.categoryIds?.forEach((id) =>   params.append("categoryId", id));
-    if (filters.status)                    params.set("status", filters.status);
+    if (filters.issuerGroupId)             params.set("issuerGroupId", filters.issuerGroupId);
+    if (filters.status)                    params.set("status",        filters.status);
     if (filters.dateFrom)   params.set("dateFrom",   filters.dateFrom);
     if (filters.dateTo)     params.set("dateTo",     filters.dateTo);
 

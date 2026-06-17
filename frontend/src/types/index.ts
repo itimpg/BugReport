@@ -23,6 +23,13 @@ export interface Category {
   updatedAt: string;
 }
 
+export interface IssuerGroup {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface BugReport {
   id: string;
   title: string;
@@ -31,6 +38,8 @@ export interface BugReport {
   status: BugStatus;
   incidentDate: string;
   imageUrl?: string;
+  issuerGroupId?: string;
+  issuerGroupName?: string;
   reportedBy: string;
   reporterName: string;
   createdAt: string;
